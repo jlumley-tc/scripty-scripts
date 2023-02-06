@@ -25,7 +25,7 @@ for key in all_keys:
     if namespace not in key_namespaces.keys():
         key_namespaces[namespace] = list()
     
-    dbg = client.debug_object(key)
+    dbg = client.debug_object(key, node=Redis.ALL_NODES)
     print(dbg)
     raise
 
