@@ -19,7 +19,7 @@ client = Redis(
         startup_nodes=startup_nodes
 )
 # authenticate with the cluster
-client.execute_command(['auth', args.password])
+client.auth(args.password)
 
 all_keys = client.keys()
 
