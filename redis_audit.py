@@ -8,13 +8,17 @@ from redis.cluster import ClusterNode as Node
 
 parser = argparse.ArgumentParser(description="Audit memory usage of Redis Cluster")
 parser.add_argument('host', type=str)
+parser.add_argument('node_count', type=int)
 parser.add_argument('port', type=str)
 parser.add_argument('password', type=str)
 args = parser.parse_args()
 
+startup_nodes = list()
 key_namespaces = dict()
 
-startup_nodes = [Node(args.host, args.port)]
+for node in range(1, node_count+1):
+    startup_nodes.append(Node(args.host+str(node).zfill(3), port))
+
 client = Redis(startup_nodes=startup_nodes, password=args.password)
 
 all_keys = client.keys()
@@ -25,7 +29,6 @@ for key in all_keys:
     if namespace not in key_namespaces.keys():
         key_namespaces[namespace] = list()
     
-    print(client.get(key, target_nodes=Redis.ALL_NODES))
     dbg = client.debug_object(key, target_nodes=Redis.ALL_NODES)
     print(dbg)
     raise
