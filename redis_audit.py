@@ -17,7 +17,7 @@ startup_nodes = list()
 key_namespaces = dict()
 
 for node in range(1, args.node_count+1):
-    startup_nodes.append(Node(args.host+str(node).zfill(3), port))
+    startup_nodes.append(Node(args.host+str(node).zfill(3), args.port))
 
 client = Redis(startup_nodes=startup_nodes, password=args.password)
 
