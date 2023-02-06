@@ -20,8 +20,7 @@ client = Redis(startup_nodes=startup_nodes, password=args.password)
 all_keys = client.keys()
 
 for key in all_keys:
-    print(key)
-    print(type(key))
+    key = key.decode("utf-8")
     namespace = key.split(":")[0]  
     if namespace not in key_namespaces.keys():
         key_namespaces[namespace] = list()
