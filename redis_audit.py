@@ -15,6 +15,7 @@ args = parser.parse_args()
 
 startup_nodes = list()
 key_namespaces = dict()
+total_memory_used = 0
 
 for node in range(1, args.node_count+1):
     startup_nodes.append(Node(args.host+str(node).zfill(3), args.port))
@@ -27,12 +28,18 @@ for key in all_keys:
     key = key.decode("utf-8")
     namespace = key.split(":")[0]  
     if namespace not in key_namespaces.keys():
-        key_namespaces[namespace] = list()
+        key_namespaces[namespace] = 0 
     
-    dbg = client.memory_usage(key) 
-    print(dbg)
-    raise
+    bytes_used = client.memory_usage(key) 
+    total_memory_used += bytes_used
+    key_namespaces[namespace] = 0
 
+
+for namespace in key_namespaces.keys():
+    print(f"{namespace} : {key_namespaces[namespace]} bytes used")
+
+print()
+print(f"total bytes used: {total_memory_used}")
 
 
 
