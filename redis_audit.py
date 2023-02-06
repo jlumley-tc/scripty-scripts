@@ -23,9 +23,11 @@ for node in range(1, args.node_count+1):
 client = Redis(startup_nodes=startup_nodes, password=args.password)
 
 all_keys = client.keys()
-
-for key in all_keys:
-    key = key.decode("utf-8")
+num_keys = len(all_keys)
+for i in range(all_keys):
+    if (i%1000 == 0):
+        print(f"working on key {i} of {num_keys}")
+    key = all_keys[i].decode("utf-8")
     namespace = key.split(":")[0]  
     if namespace not in key_namespaces.keys():
         key_namespaces[namespace] = 0 
