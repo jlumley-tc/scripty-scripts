@@ -15,9 +15,8 @@ args = parser.parse_args()
 key_namespaces = dict()
 
 startup_nodes = [Node(args.host, args.port)]
-client = Redis(
-        startup_nodes=startup_nodes
-)
+client = Redis(startup_nodes=startup_nodes, password=args.password)
+
 # authenticate with the cluster
 client.auth(args.password)
 
