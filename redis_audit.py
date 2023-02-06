@@ -17,12 +17,11 @@ key_namespaces = dict()
 startup_nodes = [Node(args.host, args.port)]
 client = Redis(startup_nodes=startup_nodes, password=args.password)
 
-# authenticate with the cluster
-client.auth(args.password)
-
 all_keys = client.keys()
 
 for key in all_keys:
+    print(key)
+    print(type(key))
     namespace = key.split(":")[0]  
     if namespace not in key_namespaces.keys():
         key_namespaces[namespace] = list()
