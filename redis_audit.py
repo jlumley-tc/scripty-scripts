@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 
 from redis.cluster import RedisCluster as Redis
@@ -5,15 +7,15 @@ from redis.cluster import ClusterNode as Node
 
 
 parser = argparse.ArgumentParser(description="Audit memory usage of Redis Cluster")
-parser.add_argument('host', type=str, required=True)
-parser.add_argument('port', type=str, required=True)
-parser.add_argument('password', type=str, required=True)
+parser.add_argument('host', type=str)
+parser.add_argument('port', type=str)
+parser.add_argument('password', type=str)
 args = parser.parse_args()
 
 key_namespaces = dict()
 
 startup_nodes = [Node(args.host, args.port)]
-client = RedisCluster(
+client = Redis(
         startup_nodes=startup_nodes
 )
 # authenticate with the cluster
