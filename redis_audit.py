@@ -72,7 +72,7 @@ def main():
         startup_nodes = [Node(args.host+str(i+1).zfill(3), 6379)]
         client = Redis(startup_nodes=startup_nodes, password=args.password)
     
-        print(client.ping(target_nodes=Redis.ALL))
+        print(client.ping(target_nodes=Redis.ALL_NODES))
         db_size = client.dbsize(target_nodes=Redis.ALL_NODES)
         sample_size = max(int(db_size*sample),1)
         keys = list()
