@@ -45,7 +45,7 @@ def audit_redis(client, keys):
 def print_summary(data):
     od = OrderedDict(sorted(data.items(), key=lambda d:d[1]))
     for namespace in od.keys():
-        if namespace == 'total' || re.search('de-dupe'):
+        if namespace == 'total' or re.search('de-dupe', namespace):
             continue 
         namespace_size = data[namespace]*(1/sample)
         total_size = data['total']*(1/sample)
