@@ -13,7 +13,6 @@ parser.add_argument('password', type=str)
 parser.add_argument('--percentage','-p', type=float, default=100)
 args = parser.parse_args()
 
-startup_nodes = [Node(args.host, 6379)]
 sample = args.percentage/100
 
 def sizeof_fmt(num, suffix="B"):
@@ -57,6 +56,7 @@ def audit_redis(client, keys):
 
 def main():
 
+    startup_nodes = [Node(args.host, 6379)]
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
     db_size = client.dbsize()
@@ -65,9 +65,9 @@ def main():
     for i in range(sample_size):
         keys.append(client.randomkey().decode("utf-8"))
 
-    audit_redis(keys)
+    audit_redis(client, keys)
 
-    print(sample_size)
+    print(f"sampled {sample_size} keys of {db_size}")
 
 if __name__ == "__main__":
     main()
