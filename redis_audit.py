@@ -63,6 +63,7 @@ def main():
     total_keys = 0;
     total_sample = 0;
     namespace_data = dict()
+    all_key_set = list()
 
     for i in range(args.node_count):
 
@@ -81,6 +82,7 @@ def main():
         for i in range(sample_size):
             keys.append(client.randomkey().decode("utf-8"))
 
+        all_key_set += keys
         node_data = audit_redis(client, keys)
 
         for namespace in node_data:
@@ -90,6 +92,8 @@ def main():
 
 
         print(f"sampled {sample_size} keys of {db_size}")
+
+    print(f"sampled {len(list(set(all_key_set)))}")
 
     print_summary(namespace_data)
 
