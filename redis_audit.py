@@ -17,6 +17,14 @@ startup_nodes = list()
 key_namespaces = dict()
 total_memory_used = 0
 
+
+def sizeof_fmt(num, suffix="B"):
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+        if abs(num) < 1024.0:
+            return f"{num:3.1f}{unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f}Yi{suffix}"
+
 for node in range(1, args.node_count+1):
     startup_nodes.append(Node(args.host+str(node).zfill(3), args.port))
 
@@ -26,22 +34,25 @@ all_keys = client.keys()
 num_keys = len(all_keys)
 for i in range(num_keys):
     if (i%1000 == 0):
+        break
         print(f"working on key {i} of {num_keys}")
     key = all_keys[i].decode("utf-8")
+    print(key.split([':'])
     namespace = key.split(":")[0]  
     if namespace not in key_namespaces.keys():
         key_namespaces[namespace] = 0 
     
     bytes_used = client.memory_usage(key) 
     total_memory_used += bytes_used
-    key_namespaces[namespace] = 0
+    key_namespaces[namespace] += bytes_used
 
 
 for namespace in key_namespaces.keys():
-    print(f"{namespace} : {key_namespaces[namespace]} bytes used")
+    size = sizeof_fmt(key_namespaces[namespace])
+    print(f"{namespace} | {size} | {key_namespaces[namespace]/total_memory_used}%")
 
 print()
-print(f"total bytes used: {total_memory_used}")
+print(f"total bytes used: {sizeof_fmt(total_memory_used)}")
 
 
 
