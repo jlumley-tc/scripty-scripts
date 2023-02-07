@@ -33,7 +33,7 @@ client = Redis(startup_nodes=startup_nodes, password=args.password)
 all_keys = client.keys()
 num_keys = len(all_keys)
 for i in range(num_keys):
-    if (i%1000 == 0):
+    if (i%1000 == 10):
         break
         print(f"working on key {i} of {num_keys}")
     key = all_keys[i].decode("utf-8")
