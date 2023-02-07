@@ -68,12 +68,13 @@ def main():
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
     db_size = client.dbsize()
-    sample_size = db_size*args.percentage
+    sample_size = int(db_size*args.percentage)
     keys = list()
     for i in range(sample_size):
         keys.append(str(client.randomkey()))
 
     print(keys)
+    print(sample_size)
 
 if __name__ == "__main__":
     main()
