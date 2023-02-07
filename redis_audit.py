@@ -52,7 +52,7 @@ def audit_redis(keys):
 
     for namespace in key_namespaces.keys():
         size = sizeof_fmt(key_namespaces[namespace])
-        print(f"{namespace} | {size} | {round(key_namespaces[namespace]/key_namespaces['total'],2)}%")
+        print(f"{namespace} | {size} | {round(100*key_namespaces[namespace]/key_namespaces['total'],2)}%")
 
     return key_namespaces
 
