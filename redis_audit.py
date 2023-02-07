@@ -3,7 +3,7 @@
 import argparse 
 import re
 
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 from redis.cluster import RedisCluster as Redis
 from redis.cluster import ClusterNode as Node
 
@@ -23,15 +23,24 @@ def sizeof_fmt(num, suffix="B"):
     return f"{num:.1f}Yi{suffix}"
 
 
-def divide_chunks(l, n):
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
+def separate_namespaces(all_keys):
+    namespace_regex = re.compile(".*:")
+    sorted_keys = dict()
 
-def audit_redis(keys):
+    for key in all_keys:
+        namespace = namespace_regex.search(key).group(0)
+        if namespace not in sorted_keys.keys():
+            sorted_keys[namespace] = [key]
+        else:
+            sorted_keys[namespace].append(key)
+
+    return list(sorted_keys.values())
+
+def audit_redis(keys, q):
 
     startup_nodes = list()
-    key_namespaces = dict(total=0)
     namespace_regex = re.compile(".*:")
+    namespace = namespace_regex.search(key).group(0)
 
     for node in range(1, args.node_count+1):
         startup_nodes.append(Node(args.host+str(node).zfill(3), args.port))
@@ -43,7 +52,6 @@ def audit_redis(keys):
         if (i%1000 == 0):
             print(f"working on key {i} of {num_keys}")
         key = keys[i].decode("utf-8")
-        namespace = namespace_regex.search(key).group(0)
         if namespace not in key_namespaces.keys():
             key_namespaces[namespace] = 0 
         
@@ -56,7 +64,7 @@ def audit_redis(keys):
         size = sizeof_fmt(key_namespaces[namespace])
         print(f"{namespace} | {size} | {round(100*key_namespaces[namespace]/key_namespaces['total'],2)}%")
 
-    return key_namespaces
+    q.put(key_namespaces)
 
 
 def main():
@@ -68,16 +76,24 @@ def main():
         startup_nodes.append(Node(args.host+str(node).zfill(3), args.port))
 
     client = Redis(startup_nodes=startup_nodes, password=args.password)
-    all_keys = client.keys()
+    all_keys = client.scan_iter()
+   
+    i =0
+    for key in all_keys:
+        i += 1
+        if 1 >10000:
+            break
+        client.memory_usage(key)
 
-    list_of_keys = divide_chunks(all_keys, 100000)
+    return
     for key_set in list_of_keys:
-        p = Process(target=audit_redis, args=(key_set,))
+        p = Process(target=audit_redis, args=(key_set, q,))
         p.start()
         pids.append(p)
 
     for p in pids:
         p.join()
+
 
 if __name__ == "__main__":
     main()
