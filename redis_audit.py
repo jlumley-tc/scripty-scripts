@@ -71,7 +71,7 @@ def main():
     sample_size = int(db_size*args.percentage)
     keys = list()
     for i in range(sample_size):
-        keys.append(str(client.randomkey()))
+        keys.append(client.randomkey().decode("utf-8"))
 
     print(keys)
     print(sample_size)
