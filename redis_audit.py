@@ -76,12 +76,12 @@ def main():
         startup_nodes.append(Node(args.host+str(node).zfill(3), args.port))
 
     client = Redis(startup_nodes=startup_nodes, password=args.password)
-    all_keys = client.keys()
+    all_keys = client.scan_iter()
    
     i =0
     for key in all_keys:
         i += 1
-        if i >10000:
+        if i == 100000:
             break
         client.memory_usage(key)
 
