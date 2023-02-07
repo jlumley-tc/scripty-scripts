@@ -26,7 +26,7 @@ def sizeof_fmt(num, suffix="B"):
 def audit_redis(client, keys):
 
     namespace_regex = re.compile(".*:")
-    key_namespaces = dict()
+    key_namespaces = dict(total=0)
 
     for key in keys:
         namespace = namespace_regex.search(key).group(0)
