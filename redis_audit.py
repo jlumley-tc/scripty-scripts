@@ -80,7 +80,6 @@ def main():
             keys.append(client.randomkey().decode("utf-8"))
 
         node_data = audit_redis(client, keys)
-        client.quit()
 
         for namespace in node_data:
             if namespace not in namespace_data.keys():
