@@ -76,7 +76,7 @@ def main():
         startup_nodes.append(Node(args.host+str(node).zfill(3), args.port))
 
     client = Redis(startup_nodes=startup_nodes, password=args.password)
-    all_keys = client.scan_iter()
+    all_keys = client.keys()
    
     i =0
     for key in all_keys:
