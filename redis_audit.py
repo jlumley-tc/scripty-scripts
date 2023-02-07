@@ -14,6 +14,7 @@ parser.add_argument('--percentage','-p', type=float, default=100)
 args = parser.parse_args()
 
 startup_nodes = [Node(args.host, 6379)]
+sample = args.percentage/100
 
 def sizeof_fmt(num, suffix="B"):
     for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
@@ -23,31 +24,13 @@ def sizeof_fmt(num, suffix="B"):
     return f"{num:.1f}Yi{suffix}"
 
 
-def separate_namespaces(all_keys):
-    namespace_regex = re.compile(".*:")
-    sorted_keys = dict()
-
-    for key in all_keys:
-        namespace = namespace_regex.search(key).group(0)
-        if namespace not in sorted_keys.keys():
-            sorted_keys[namespace] = [key]
-        else:
-            sorted_keys[namespace].append(key)
-
-    return list(sorted_keys.values())
-
-def audit_redis(keys):
+def audit_redis(client, keys):
 
     namespace_regex = re.compile(".*:")
     namespace = namespace_regex.search(key).group(0)
+    key_namespaces = dict()
 
-    client = Redis(startup_nodes=startup_nodes, password=args.password)
-
-    num_keys = len(keys)
-    for i in range(num_keys):
-        if (i%1000 == 0):
-            print(f"working on key {i} of {num_keys}")
-        key = keys[i].decode("utf-8")
+    for key in keys:
         if namespace not in key_namespaces.keys():
             key_namespaces[namespace] = 0 
         
@@ -57,8 +40,17 @@ def audit_redis(keys):
 
 
     for namespace in key_namespaces.keys():
-        size = sizeof_fmt(key_namespaces[namespace])
-        print(f"{namespace} | {size} | {round(100*key_namespaces[namespace]/key_namespaces['total'],2)}%")
+        if namespace == 'total':
+            continue 
+        namespace_size = key_namespaces[namespace]*(1/sample)
+        total_size = key_namespaces['total']*(1/sample)
+        size_str = sizeof_fmt(namespace_size)
+        percentage_str = round(100*namespace_size/total_size,2)
+
+        print(f"{namespace} | {size_str} | {percentage_str}%")
+    
+    print()
+    print(f"Total: {sizeof_fmt(key_namespaces['total']*(1/sample))}")
 
     return key_namespaces
 
@@ -68,12 +60,13 @@ def main():
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
     db_size = client.dbsize()
-    sample_size = int(db_size*args.percentage)
+    sample_size = int(db_size*sample)
     keys = list()
     for i in range(sample_size):
         keys.append(client.randomkey().decode("utf-8"))
 
-    print(keys)
+    audit_redis(keys)
+
     print(sample_size)
 
 if __name__ == "__main__":
