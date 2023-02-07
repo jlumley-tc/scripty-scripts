@@ -48,15 +48,15 @@ def print_summary(data):
     for namespace in od.keys():
         if namespace == 'total':
             continue 
-        namespace_size = key_namespaces[namespace]*(1/sample)
-        total_size = key_namespaces['total']*(1/sample)
+        namespace_size = data[namespace]*(1/sample)
+        total_size = data['total']*(1/sample)
         size_str = sizeof_fmt(namespace_size)
         percentage_str = round(100*namespace_size/total_size,2)
 
         print(f"{namespace} | {size_str} | {percentage_str}%")
     
     print()
-    print(f"Total: {sizeof_fmt(key_namespaces['total']*(1/sample))}")
+    print(f"Total: {sizeof_fmt(data['total']*(1/sample))}")
 
 def main():
 
@@ -80,6 +80,7 @@ def main():
             keys.append(client.randomkey().decode("utf-8"))
 
         node_data = audit_redis(client, keys)
+        client.quit()
 
         for namespace in node_data:
             if namespace not in namespace_data.keys():
