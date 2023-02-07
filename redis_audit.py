@@ -70,7 +70,7 @@ def main():
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     all_keys = client.keys()
 
-    list_of_keys = divide_chunks(all_keys, 10)
+    list_of_keys = divide_chunks(all_keys, 100000)
     for key_set in list_of_keys:
         p = Process(target=audit_redis, args=(key_set,))
         p.start()
