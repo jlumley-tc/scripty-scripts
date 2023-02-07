@@ -9,6 +9,7 @@ from redis.cluster import ClusterNode as Node
 
 parser = argparse.ArgumentParser(description="Audit memory usage of Redis Cluster")
 parser.add_argument('host', type=str)
+parser.add_argument('node_count', type=int)
 parser.add_argument('password', type=str)
 parser.add_argument('--percentage','-p', type=float, default=100)
 args = parser.parse_args()
@@ -56,7 +57,10 @@ def audit_redis(client, keys):
 
 def main():
 
-    startup_nodes = [Node(args.host, 6379)]
+    startup_nodes = list() 
+    for i in range(args.node_count):
+        startup_nodes.append(Node(args.host+str(i).zfill(3), 6379))
+
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
     db_size = client.dbsize()
