@@ -44,7 +44,7 @@ def audit_redis(client, keys):
 
 
 def print_summary(data):
-    od = OrderedDict(sorted(data.items()))
+    od = OrderedDict(sorted(data.items(), key=lambda d:d[1]))
     for namespace in od.keys():
         if namespace == 'total':
             continue 
@@ -58,39 +58,23 @@ def print_summary(data):
     print()
     print(f"Total: {sizeof_fmt(data['total']*(1/sample))}")
 
+
 def main():
 
-    total_keys = 0;
-    total_sample = 0;
-    namespace_data = dict()
-
-    for i in range(args.node_count):
-
-        print(f" node: {args.host+str(i+1).zfill(3)}")
-
-        
-        startup_nodes = [Node(args.host+str(i+1).zfill(3), 6379)]
-        client = Redis(startup_nodes=startup_nodes, password=args.password)
+    startup_nodes = [Node(args.host, 6379)]
+    client = Redis(startup_nodes=startup_nodes, password=args.password)
     
-        print(client.ping(target_nodes=Redis.ALL_NODES))
-        db_size = client.dbsize(target_nodes=Redis.ALL_NODES)
-        sample_size = max(int(db_size*sample),1)
-        keys = list()
-        total_keys += db_size
-        total_sample += sample_size
+    db_size = client.dbsize(target_nodes=Redis.ALL_NODES)
+    sample_size = max(int(db_size*sample),1)
+    keys = list()
 
-        for i in range(sample_size):
-            keys.append(client.randomkey().decode("utf-8"))
+    for i in range(sample_size):
+        keys.append(client.randomkey().decode("utf-8"))
 
-        node_data = audit_redis(client, keys)
-
-        for namespace in node_data:
-            if namespace not in namespace_data.keys():
-                namespace_data[namespace] = 0
-            namespace_data[namespace] += node_data[namespace]
+    namespace_data = audit_redis(client, keys)
 
 
-        print(f"sampled {sample_size} keys of {db_size}")
+    print(f"sampled {sample_size} keys of {db_size}")
 
     print_summary(namespace_data)
 
