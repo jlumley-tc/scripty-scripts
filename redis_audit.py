@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import re
 
 from redis.cluster import RedisCluster as Redis
 from redis.cluster import ClusterNode as Node
@@ -37,8 +38,8 @@ for i in range(num_keys):
         break
         print(f"working on key {i} of {num_keys}")
     key = all_keys[i].decode("utf-8")
-    print(key.split(':'))
-    namespace = key.split(":")[0]  
+    print(re.search('.*:').match(0))
+    namespace = key.split(":")[0] 
     if namespace not in key_namespaces.keys():
         key_namespaces[namespace] = 0 
     
