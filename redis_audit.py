@@ -68,7 +68,7 @@ def main():
 
         print(f" node: {args.host+str(i+1).zfill(3)}")
 
-        startup_nodes = [Node(args.host+str(i+1).zfill(3), 6379)]
+        startup_nodes = [Node(args.host+str(i+19).zfill(3), 6379)]
         client = Redis(startup_nodes=startup_nodes, password=args.password)
     
         db_size = client.dbsize()
