@@ -81,7 +81,7 @@ def main():
     i =0
     for key in all_keys:
         i += 1
-        if 1 >10000:
+        if i >10000:
             break
         client.memory_usage(key)
 
