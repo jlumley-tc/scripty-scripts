@@ -23,7 +23,9 @@ def sizeof_fmt(num, suffix="B"):
     return f"{num:.1f}Yi{suffix}"
 
 
-
+def divide_chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
 
 def audit_redis(keys):
 
@@ -60,17 +62,22 @@ def audit_redis(keys):
 def main():
 
     startup_nodes = list()
+    pids = list()
+
     for node in range(1, args.node_count+1):
         startup_nodes.append(Node(args.host+str(node).zfill(3), args.port))
 
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     all_keys = client.keys()
 
-    list_of_keys = all_keys[:1000]
-    p = Process(target=audit_redis, args=(list_of_keys,))
-    p.start()
-    p.join()
-    print('done')
+    list_of_keys = divide_chunks(all_keys, 10)
+    for key_set in list_of_keys:
+        p = Process(target=audit_redis, args=(list_of_keys,))
+        p.start()
+        pids.append(p)
+
+    for p in pids:
+        p.join()
 
 if __name__ == "__main__":
     main()
