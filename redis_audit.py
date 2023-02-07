@@ -3,6 +3,7 @@
 import argparse 
 import re
 
+from collections import OrderedDict
 from redis.cluster import RedisCluster as Redis
 from redis.cluster import ClusterNode as Node
 
@@ -38,8 +39,8 @@ def audit_redis(client, keys):
         key_namespaces['total'] += bytes_used
         key_namespaces[namespace] += bytes_used
 
-
-    for namespace in key_namespaces.keys():
+    od = OrderedDict(sorted(key_namespaces.items()))
+    for namespace in od.keys():
         if namespace == 'total':
             continue 
         namespace_size = key_namespaces[namespace]*(1/sample)
@@ -59,7 +60,7 @@ def main():
 
     startup_nodes = list() 
     for i in range(args.node_count):
-        startup_nodes.append(Node(args.host+str(i).zfill(3), 6379))
+        startup_nodes.append(Node(args.host+str(i+1).zfill(3), 6379))
 
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
