@@ -17,6 +17,7 @@ args = parser.parse_args()
 startup_nodes = list()
 key_namespaces = dict()
 total_memory_used = 0
+namespace_regex = re.compile(".*:")
 
 
 def sizeof_fmt(num, suffix="B"):
@@ -34,12 +35,11 @@ client = Redis(startup_nodes=startup_nodes, password=args.password)
 all_keys = client.keys()
 num_keys = len(all_keys)
 for i in range(num_keys):
-    if (i%1000 == 10):
+    if (i%1000 == 100):
         break
         print(f"working on key {i} of {num_keys}")
     key = all_keys[i].decode("utf-8")
-    print(re.search('.*:', key))
-    namespace = key.split(":")[0] 
+    namespace = namespace_regex.search(key).group(0)
     if namespace not in key_namespaces.keys():
         key_namespaces[namespace] = 0 
     
@@ -50,7 +50,7 @@ for i in range(num_keys):
 
 for namespace in key_namespaces.keys():
     size = sizeof_fmt(key_namespaces[namespace])
-    print(f"{namespace} | {size} | {key_namespaces[namespace]/total_memory_used}%")
+    print(f"{namespace} | {size} | {round(key_namespaces[namespace]/total_memory_used,2)}%")
 
 print()
 print(f"total bytes used: {sizeof_fmt(total_memory_used)}")
