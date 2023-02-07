@@ -3,17 +3,17 @@
 import argparse 
 import re
 
-from multiprocessing import Process, Queue
 from redis.cluster import RedisCluster as Redis
 from redis.cluster import ClusterNode as Node
 
 
 parser = argparse.ArgumentParser(description="Audit memory usage of Redis Cluster")
 parser.add_argument('host', type=str)
-parser.add_argument('node_count', type=int)
-parser.add_argument('port', type=str)
 parser.add_argument('password', type=str)
+parser.add_argument('--percentage','-p', type=float, default=100)
 args = parser.parse_args()
+
+startup_nodes = [Node(args.host, 6379)]
 
 def sizeof_fmt(num, suffix="B"):
     for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
@@ -36,14 +36,10 @@ def separate_namespaces(all_keys):
 
     return list(sorted_keys.values())
 
-def audit_redis(keys, q):
+def audit_redis(keys):
 
-    startup_nodes = list()
     namespace_regex = re.compile(".*:")
     namespace = namespace_regex.search(key).group(0)
-
-    for node in range(1, args.node_count+1):
-        startup_nodes.append(Node(args.host+str(node).zfill(3), args.port))
 
     client = Redis(startup_nodes=startup_nodes, password=args.password)
 
@@ -64,36 +60,20 @@ def audit_redis(keys, q):
         size = sizeof_fmt(key_namespaces[namespace])
         print(f"{namespace} | {size} | {round(100*key_namespaces[namespace]/key_namespaces['total'],2)}%")
 
-    q.put(key_namespaces)
+    return key_namespaces
 
 
 def main():
 
-    startup_nodes = list()
-    pids = list()
-
-    for node in range(1, args.node_count+1):
-        startup_nodes.append(Node(args.host+str(node).zfill(3), args.port))
-
     client = Redis(startup_nodes=startup_nodes, password=args.password)
-    all_keys = client.scan_iter()
-   
-    i =0
-    for key in all_keys:
-        i += 1
-        if i == 100000:
-            break
-        client.memory_usage(key)
+    
+    db_size = client.dbsize()
+    sample_size = db_size*args.percentage
+    keys = list()
+    for i in range(sample_size):
+        keys.append(str(client.randomkey()))
 
-    return
-    for key_set in list_of_keys:
-        p = Process(target=audit_redis, args=(key_set, q,))
-        p.start()
-        pids.append(p)
-
-    for p in pids:
-        p.join()
-
+    print(keys)
 
 if __name__ == "__main__":
     main()
