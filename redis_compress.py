@@ -21,7 +21,8 @@ def compress_redis_data(client, key):
 
     data = client.get(key)
     print(data)
-    print(type(data))
+    compressed_string = gzip.compress(data)
+    print(compressed_string)
 
 
 def main():
