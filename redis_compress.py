@@ -2,7 +2,7 @@
 
 import argparse 
 import gzip
-import re
+import sys
 
 from redis.cluster import RedisCluster as Redis
 from redis.cluster import ClusterNode as Node
@@ -17,13 +17,25 @@ args = parser.parse_args()
 
 compressed_keys_log = 'compressed_keys_file.log'
 
+
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
+
+
 def compress_redis_data(client, key):
 
     data = client.get(key)
-    print(data)
     compressed_string = gzip.compress(data)
-    print(compressed_string)
 
+    print('original data: ', convert_size(sys.getsizeof(data))
+    print('compressed data: ', convert_size(sys.getsizeof(compressed_string))
+    print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
 
 def main():
 
