@@ -35,10 +35,13 @@ def convert_size(size_bytes):
 def compress_redis_data(client, key):
 
     data = client.get(key)
-    print(is_compressed(data))
+    if (is_compressed(data)):
+        print(f'{key} is already compressed')
+        return
     
     compressed_string = gzip.compress(data)
-    print(is_compressed(compressed_string))
+
+    client.set(key, compressed_string, px=args.ttl)
 
     # print('original data: ', convert_size(sys.getsizeof(data)))
     # print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
