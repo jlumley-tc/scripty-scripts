@@ -41,7 +41,7 @@ def main():
     startup_nodes = [Node(args.host, 6379)]
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
-    keys_file = open(compressed_keys_log, 'r+')
+    keys_file = open(compressed_keys_log, 'w+')
     compressed_keys=set(keys_file.readlines())
 
     for key in client.scan(match=args.regex):
