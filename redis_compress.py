@@ -53,9 +53,7 @@ def main():
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
     keys_file = open(compressed_keys_log, 'r+')
-    compressed_keys=set(keys_file.readlines())
-    print(compressed_keys)
-    return
+    compressed_keys=set([key.strip() for key in keys_file.readlines()])
 
     for key in client.scan_iter(match=args.regex):
         key = key.decode("utf-8")
