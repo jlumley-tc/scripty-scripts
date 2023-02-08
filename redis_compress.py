@@ -42,7 +42,7 @@ def main():
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
     with open(compressed_keys_log, 'r') as keys_file:
-        compressed_keys=set(keys_file.readlines())
+        compressed_keys=set(keys_file.read())
 
     for key in client.scan(match=args.regex):
         key = key.decode("utf-8")
@@ -52,8 +52,7 @@ def main():
         else:
            compress_redis_data(key) 
            compressed_keys.add(key)
-           keys_file.write(key)
-        
+    
 
     print(f"compressed {len(compressed_keys)} keys")
 
