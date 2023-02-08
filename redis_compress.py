@@ -2,6 +2,7 @@
 
 import argparse 
 import gzip
+import math
 import sys
 
 from redis.cluster import RedisCluster as Redis
