@@ -59,7 +59,6 @@ def main():
         key = key.decode("utf-8")
 
         if "de-dupe" in key:
-            print("ignoring deduplication key")
             continue
 
         if key in compressed_keys:
