@@ -33,8 +33,8 @@ def compress_redis_data(client, key):
     data = client.get(key)
     compressed_string = gzip.compress(data)
 
-    print('original data: ', convert_size(sys.getsizeof(data))
-    print('compressed data: ', convert_size(sys.getsizeof(compressed_string))
+    print('original data: ', convert_size(sys.getsizeof(data)))
+    print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
     print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
 
 def main():
