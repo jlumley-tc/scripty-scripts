@@ -17,6 +17,7 @@ parser.add_argument('--ttl', type=int, help='add ttl to the new keys (in ms)')
 args = parser.parse_args()
 
 compressed_keys_log = 'compressed_keys_file.log'
+GZIP_MAGIC_NUMBER = "1f8b"
 
 
 def convert_size(size_bytes):
@@ -32,11 +33,14 @@ def convert_size(size_bytes):
 def compress_redis_data(client, key):
 
     data = client.get(key)
+    data.read(2) == b'\x1f\x8b'
+    
     compressed_string = gzip.compress(data)
+    compressed_string.read(2) == b'\x1f\x8b'
 
-    print('original data: ', convert_size(sys.getsizeof(data)))
-    print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
-    print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
+    # print('original data: ', convert_size(sys.getsizeof(data)))
+    # print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
+    # print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
 
 def main():
 
