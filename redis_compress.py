@@ -58,6 +58,10 @@ def main():
     for key in client.scan_iter(match=args.regex):
         key = key.decode("utf-8")
 
+        if "de-dupe" in key:
+            print("ignoring deduplication key")
+            continue
+
         if key in compressed_keys:
             continue
         else:
