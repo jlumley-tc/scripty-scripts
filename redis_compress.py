@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(description="Audit memory usage of Redis Cluste
 parser.add_argument('host', type=str)
 parser.add_argument('password', type=str)
 parser.add_argument('--regex', type=str, help='keys to compress')
+parser.add_argument('--ttl', type=int, help='add ttl to the new keys (in ms)')
 args = parser.parse_args()
 
 compressed_keys_log = 'compressed_keys_file.log'
@@ -19,21 +20,8 @@ compressed_keys_log = 'compressed_keys_file.log'
 def compress_redis_data(client, key):
 
     data = client.get(key)
-
-def print_summary(data):
-    od = OrderedDict(sorted(data.items(), key=lambda d:d[1]))
-    for namespace in od.keys():
-        if namespace == 'total' or re.search('de-dupe', namespace):
-            continue 
-        namespace_size = data[namespace]*(1/sample)
-        total_size = data['total']*(1/sample)
-        size_str = sizeof_fmt(namespace_size)
-        percentage_str = round(100*namespace_size/total_size,2)
-
-        print(f"{namespace} | {size_str} | {percentage_str}%")
-    
-    print()
-    print(f"Total: {sizeof_fmt(data['total']*(1/sample))}")
+    print(data)
+    print(type(data))
 
 
 def main():
@@ -45,14 +33,14 @@ def main():
     compressed_keys=set(keys_file.readlines())
 
     for key in client.scan_iter(match=args.regex):
-        print(key)
         key = key.decode("utf-8")
 
         if key in compressed_keys:
             continue
         else:
-           compress_redis_data(key) 
+           compress_redis_data(client, key) 
            compressed_keys.add(key)
+           keys_file.write(key+"\n")
     
 
     print(f"compressed {len(compressed_keys)} keys")
