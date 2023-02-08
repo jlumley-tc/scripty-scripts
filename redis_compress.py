@@ -44,7 +44,7 @@ def main():
     keys_file = open(compressed_keys_log, 'r+')
     compressed_keys=set(keys_file.readlines())
 
-    for key in client.scaniter(match=args.regex):
+    for key in client.scan_iter(match=args.regex):
         print(key)
         key = key.decode("utf-8")
 
