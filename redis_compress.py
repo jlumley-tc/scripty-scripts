@@ -91,7 +91,7 @@ def main():
         if num_keys % 1000 == 0:
 
             stat = num_keys*1000*60/(time.time()-start_time)
-            print(f"Compressing {round(stat,2)} keys/min, end="\r")
+            print(f"Compressing {round(stat,2)} keys/min", end="\r")
             
 
 
