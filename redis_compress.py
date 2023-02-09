@@ -71,6 +71,11 @@ def main():
     for key in client.scan_iter():
         key = key.decode("utf-8")
         num_keys +=1
+        # print out keys/min stats
+        if num_keys % 100 == 0:
+
+            stat = num_keys*1000*60/(time.time()-start_time)
+            print(f"Compressing {round(stat,2)} keys/min", end="\r")
 
         # skip deduplication keys
         if de_dupe_regex.search(key):
@@ -87,12 +92,6 @@ def main():
         compress_redis_data(client, key) 
         keys_file.write(key+"\n")
 
-        print(num_keys)
-        # print out keys/min stats
-        if num_keys % 100 == 0:
-
-            stat = num_keys*1000*60/(time.time()-start_time)
-            print(f"Compressing {round(stat,2)} keys/min", end="\r")
             
 
 
