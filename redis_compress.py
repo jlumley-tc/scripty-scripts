@@ -72,9 +72,8 @@ def main():
         key = key.decode("utf-8")
         num_keys +=1
         # print out keys/min stats
-        if num_keys % 100 == 0:
-
-            stat = num_keys*1000*60/(time.time()-start_time)
+        if num_keys % 10000 == 0:
+            stat = num_keys*60/(time.time()-start_time)
             print(f"Compressing {round(stat,2)} keys/min", end="\r")
 
         # skip deduplication keys
