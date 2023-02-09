@@ -5,6 +5,7 @@ import gzip
 import math
 import re
 import sys
+import time
 
 from redis.cluster import RedisCluster as Redis
 from redis.cluster import ClusterNode as Node
@@ -63,13 +64,13 @@ def main():
     startup_nodes = [Node(args.host, 6379)]
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
-    print(f"compressing all keys that match {args.regex} and adding ttl of {args.ttl} ms")
     keys_file = open(compressed_keys_log, 'r+')
     compressed_keys=set([key.strip() for key in keys_file.readlines()])
-
+    start_time = time.time()
+    num_keys = 0
     for key in client.scan_iter():
-        print(key, end="\r")
         key = key.decode("utf-8")
+        num_keys +=1
 
         # skip deduplication keys
         if de_dupe_regex.search(key):
@@ -85,6 +86,14 @@ def main():
         
         compress_redis_data(client, key) 
         keys_file.write(key+"\n")
+
+        # print out keys/min stats
+        if num_keys % 1000 == 0:
+
+            stat = num_keys*1000*60/(time.time()-start_time)
+            print(f"Compressing {round(stat,2)} keys/min, end="\r")
+            
+
 
 if __name__ == "__main__":
     main()
