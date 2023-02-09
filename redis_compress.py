@@ -88,7 +88,7 @@ def main():
         keys_file.write(key+"\n")
 
         # print out keys/min stats
-        if num_keys % 1000 == 0:
+        if num_keys % 100 == 0:
 
             stat = num_keys*1000*60/(time.time()-start_time)
             print(f"Compressing {round(stat,2)} keys/min", end="\r")
