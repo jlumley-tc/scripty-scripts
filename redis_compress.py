@@ -15,7 +15,6 @@ parser.add_argument('host', type=str)
 parser.add_argument('password', type=str)
 parser.add_argument('--regex', type=str, help='keys to compress')
 parser.add_argument('--ttl', type=int, help='add ttl to the new keys (in ms)')
-parser.add_argument('--verify-count', type=int, default=500, help='how many keys to check for compression')
 args = parser.parse_args()
 
 compressed_keys_log = 'compressed_keys_file.log'
@@ -64,37 +63,28 @@ def main():
     startup_nodes = [Node(args.host, 6379)]
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
+    print(f"compressing all keys that match {args.regex} and adding ttl of {args.ttl} ms")
     keys_file = open(compressed_keys_log, 'r+')
     compressed_keys=set([key.strip() for key in keys_file.readlines()])
 
-    
     for key in client.scan_iter():
+        print(key, end="\r")
         key = key.decode("utf-8")
 
+        # skip deduplication keys
         if de_dupe_regex.search(key):
             continue
 
+        # skip keys that don't match the regex
         if not filter_regex.search(key):
             continue
 
+        # skip keys that have already been compressed
         if key in compressed_keys:
             continue
         
-        print(key)
         compress_redis_data(client, key) 
-        compressed_keys.add(key)
         keys_file.write(key+"\n")
-    
-    print(f"compressed {len(compressed_keys)} keys")
-
-    for key in client.scan_iter(match=args.regex, count=args.verify_count):
-        key = key.decode("utf-8")
-
-        if "de-dupe" in key:
-            continue
-        verify_compressed(client, key)
-
-    print(f"verified {args.verify_count} keys are compressed")
 
 if __name__ == "__main__":
     main()
