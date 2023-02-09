@@ -45,7 +45,7 @@ def compress_redis_data(client, key):
 
     data = client.get(key)
     if (is_compressed(data)):
-        print(f'{key} is already compressed')
+        # print(f'{key} is already compressed')
         return
     
     compressed_string = gzip.compress(data)
