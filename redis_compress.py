@@ -3,6 +3,7 @@
 import argparse 
 import gzip
 import math
+import re
 import sys
 
 from redis.cluster import RedisCluster as Redis
@@ -18,6 +19,8 @@ parser.add_argument('--verify-count', type=int, default=500, help='how many keys
 args = parser.parse_args()
 
 compressed_keys_log = 'compressed_keys_file.log'
+de_dupe_regex = re.compile("de-dupe")
+filter_regex = re.compile(f"^{args.regex}")
 
 
 def is_compressed(data):
@@ -64,19 +67,23 @@ def main():
     keys_file = open(compressed_keys_log, 'r+')
     compressed_keys=set([key.strip() for key in keys_file.readlines()])
 
-    for key in client.scan_iter(match=args.regex):
+    
+    for key in client.scan_iter():
         key = key.decode("utf-8")
 
-        print(key)
-        if "de-dupe" in key:
+        if de_dupe_regex.search(key):
+            continue
+
+        if not filter_regex.search(key):
             continue
 
         if key in compressed_keys:
             continue
-        else:
-           compress_redis_data(client, key) 
-           compressed_keys.add(key)
-           keys_file.write(key+"\n")
+        
+        print(key)
+        compress_redis_data(client, key) 
+        compressed_keys.add(key)
+        keys_file.write(key+"\n")
     
     print(f"compressed {len(compressed_keys)} keys")
 
