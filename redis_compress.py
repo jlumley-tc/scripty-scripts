@@ -87,6 +87,7 @@ def main():
         compress_redis_data(client, key) 
         keys_file.write(key+"\n")
 
+        print(num_keys)
         # print out keys/min stats
         if num_keys % 100 == 0:
 
