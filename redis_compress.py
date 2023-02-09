@@ -14,6 +14,7 @@ parser.add_argument('host', type=str)
 parser.add_argument('password', type=str)
 parser.add_argument('--regex', type=str, help='keys to compress')
 parser.add_argument('--ttl', type=int, help='add ttl to the new keys (in ms)')
+parser.add_argument('--verify-count', type=int, default=500, help='how many keys to check for compression')
 args = parser.parse_args()
 
 compressed_keys_log = 'compressed_keys_file.log'
@@ -21,6 +22,7 @@ compressed_keys_log = 'compressed_keys_file.log'
 
 def is_compressed(data):
     return data[:2] == b'\x1f\x8b'
+
 
 def convert_size(size_bytes):
     if size_bytes == 0:
@@ -31,6 +33,13 @@ def convert_size(size_bytes):
     s = round(size_bytes / p, 2)
     return "%s %s" % (s, size_name[i])
 
+
+def verify_compressed(client, key):
+    
+    data = client.get(key)
+    if not is_compressed(data):
+        raise Exception(f"Found uncompressed key {key}")
+    
 
 def compress_redis_data(client, key):
 
@@ -68,9 +77,16 @@ def main():
            compressed_keys.add(key)
            keys_file.write(key+"\n")
     
-
     print(f"compressed {len(compressed_keys)} keys")
 
+    for key in client.scan_iter(match=args.regex, count=args.verify_count):
+        key = key.decode("utf-8")
+
+        if "de-dupe" in key:
+            continue
+        verify_compressed(client, key)
+
+    print(f"verified {args.verify_count} keys are compressed")
 
 if __name__ == "__main__":
     main()
