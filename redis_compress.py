@@ -14,14 +14,11 @@ from redis.cluster import ClusterNode as Node
 parser = argparse.ArgumentParser(description="Audit memory usage of Redis Cluster")
 parser.add_argument('host', type=str)
 parser.add_argument('password', type=str)
-parser.add_argument('--regex', type=str, help='keys to compress')
 parser.add_argument('--ttl', type=int, help='add ttl to the new keys (in ms)')
 args = parser.parse_args()
 
 compressed_keys_log = 'compressed_keys_file.log'
 de_dupe_regex = re.compile("de-dupe")
-filter_regex = re.compile(f"^{args.regex}")
-
 
 def is_compressed(data):
     return data[:2] == b'\x1f\x8b'
@@ -78,10 +75,6 @@ def main():
 
         # skip deduplication keys
         if de_dupe_regex.search(key):
-            continue
-
-        # skip keys that don't match the regex
-        if not filter_regex.search(key):
             continue
 
         # skip keys that have already been compressed
