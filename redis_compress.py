@@ -67,6 +67,7 @@ def main():
     for key in client.scan_iter(match=args.regex):
         key = key.decode("utf-8")
 
+        print(key)
         if "de-dupe" in key:
             continue
 
