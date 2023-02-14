@@ -2,6 +2,7 @@
 
 import argparse 
 import gzip
+import json
 import math
 import re
 import sys
@@ -20,9 +21,9 @@ args = parser.parse_args()
 compressed_keys_log = 'compressed_keys_file.log'
 de_dupe_regex = re.compile("de-dupe")
 
+
 def is_compressed(data):
     return data[:2] == b'\x1f\x8b'
-
 
 def convert_size(size_bytes):
     if size_bytes == 0:
@@ -33,6 +34,25 @@ def convert_size(size_bytes):
     s = round(size_bytes / p, 2)
     return "%s %s" % (s, size_name[i])
 
+def generate_ttl_data():
+
+    with open('ttl_data.json', 'r') as json_file:
+        ttl_data = json.loads(json_file.read())
+
+    for d in ttl_data:
+        d['compiled_regex'] = re.compile(d['regex'])
+
+    return ttl_data
+
+def get_ttl(key, ttl_data):
+    max_ttl = 0
+
+    for namespace in ttl_data:
+        if namespace.['compiled_regex'].match(key):
+            max_ttl = max(ttl, namespace['ttl_ms'])
+
+    return max_ttl
+
 
 def verify_compressed(client, key):
     
@@ -41,7 +61,7 @@ def verify_compressed(client, key):
         raise Exception(f"Found uncompressed key {key}")
     
 
-def compress_redis_data(client, key):
+def compress_redis_data(client, key, ttl_data):
 
     data = client.get(key)
     if (is_compressed(data)):
@@ -50,11 +70,11 @@ def compress_redis_data(client, key):
     
     compressed_string = gzip.compress(data)
 
-    client.set(key, compressed_string, px=args.ttl)
-
+    client.set(key, compressed_string, px=get_ttl())
     # print('original data: ', convert_size(sys.getsizeof(data)))
     # print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
     # print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
+
 
 def main():
 
@@ -63,8 +83,12 @@ def main():
     
     keys_file = open(compressed_keys_log, 'r+')
     compressed_keys=set([key.strip() for key in keys_file.readlines()])
+    ttl_data = generate_ttl_data()
+    print(ttl_data)
+
     start_time = time.time()
     num_keys = 0
+
     for key in client.scan_iter():
         key = key.decode("utf-8")
         num_keys +=1
@@ -81,10 +105,8 @@ def main():
         if key in compressed_keys:
             continue
         
-        compress_redis_data(client, key) 
+        compress_redis_data(client, key, ttl_data)
         keys_file.write(key+"\n")
-
-            
 
 
 if __name__ == "__main__":
