@@ -66,11 +66,6 @@ def compress_redis_data(client, key, ttl_data):
 
     data = client.get(key)
     ttl = get_ttl(key, ttl_data)
-    if (is_compressed(data)):
-        # print(f'{key} is already compressed')
-        return
-    
-    compressed_string = gzip.compress(data)
 
     client.set(key, compressed_string, px=ttl)
 
@@ -80,6 +75,12 @@ def compress_redis_data(client, key, ttl_data):
             print('original data: ', convert_size(sys.getsizeof(data)))
             print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
             print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
+
+    if (is_compressed(data)):
+        # print(f'{key} is already compressed')
+        return
+    
+    compressed_string = gzip.compress(data)
 
 
 def main():
