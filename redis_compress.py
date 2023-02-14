@@ -4,6 +4,7 @@ import argparse
 import gzip
 import json
 import math
+import random
 import re
 import sys
 import time
@@ -71,8 +72,9 @@ def compress_redis_data(client, key, ttl_data):
     
     compressed_string = gzip.compress(data)
 
-    if random.randint(1,10000) == 1234:
-        print(f"SET {key} {compressed_string} px {ttl}")
+    if args.verbose:
+        if random.randint(1,10000) == 1234:
+            print(f"SET {key} {compressed_string} px {ttl}")
     client.set(key, compressed_string, px=ttl)
     # print('original data: ', convert_size(sys.getsizeof(data)))
     # print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
