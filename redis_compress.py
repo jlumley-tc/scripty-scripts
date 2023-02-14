@@ -67,7 +67,7 @@ def compress_redis_data(client, key, ttl_data):
     data = client.get(key)
     ttl = get_ttl(key, ttl_data)
 
-    client.set(key, compressed_string, px=ttl)
+    compressed_string = gzip.compress(data)
 
     if args.verbose:
         if random.randint(1,10000) > 5000:
@@ -76,11 +76,8 @@ def compress_redis_data(client, key, ttl_data):
             print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
             print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
 
-    if (is_compressed(data)):
-        # print(f'{key} is already compressed')
-        return
-    
-    compressed_string = gzip.compress(data)
+    if not is_compressed(data):
+        client.set(key, compressed_string, px=ttl)
 
 
 def main():
