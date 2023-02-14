@@ -48,7 +48,7 @@ def get_ttl(key, ttl_data):
     max_ttl = 0
 
     for namespace in ttl_data:
-        if namespace.['compiled_regex'].match(key):
+        if namespace['compiled_regex'].match(key):
             max_ttl = max(ttl, namespace['ttl_ms'])
 
     return max_ttl
