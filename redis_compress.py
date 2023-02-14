@@ -72,13 +72,14 @@ def compress_redis_data(client, key, ttl_data):
     
     compressed_string = gzip.compress(data)
 
-    if args.verbose:
-        if random.randint(1,10000) == 1234:
-            print(f"SET {key} {compressed_string} px {ttl}")
     client.set(key, compressed_string, px=ttl)
-    # print('original data: ', convert_size(sys.getsizeof(data)))
-    # print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
-    # print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
+
+    if args.verbose:
+        if random.randint(1,10000) > 5000:
+            print(f"SET {key} {compressed_string} px {ttl}")
+            print('original data: ', convert_size(sys.getsizeof(data)))
+            print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
+            print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
 
 
 def main():
