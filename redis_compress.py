@@ -15,7 +15,6 @@ from redis.cluster import ClusterNode as Node
 parser = argparse.ArgumentParser(description="Audit memory usage of Redis Cluster")
 parser.add_argument('host', type=str)
 parser.add_argument('password', type=str)
-parser.add_argument('--ttl', type=int, help='add ttl to the new keys (in ms)')
 args = parser.parse_args()
 
 compressed_keys_log = 'compressed_keys_file.log'
@@ -66,13 +65,14 @@ def verify_compressed(client, key):
 def compress_redis_data(client, key, ttl_data):
 
     data = client.get(key)
+    ttl = get_ttl()
     if (is_compressed(data)):
         # print(f'{key} is already compressed')
         return
     
     compressed_string = gzip.compress(data)
 
-    client.set(key, compressed_string, px=get_ttl())
+    client.set(key, compressed_string, px=ttl)
     # print('original data: ', convert_size(sys.getsizeof(data)))
     # print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
     # print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
