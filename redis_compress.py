@@ -65,7 +65,7 @@ def verify_compressed(client, key):
 def compress_redis_data(client, key, ttl_data):
 
     data = client.get(key)
-    ttl = get_ttl()
+    ttl = get_ttl(key, ttl_data)
     if (is_compressed(data)):
         # print(f'{key} is already compressed')
         return
