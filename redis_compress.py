@@ -40,7 +40,6 @@ def generate_ttl_data():
         ttl_data = json.loads(json_file.read())
 
     for d in ttl_data:
-        print(type(re.compile(d['regex'])))
         d['compiled_regex'] = re.compile(d['regex'])
 
     return ttl_data
@@ -50,7 +49,9 @@ def get_ttl(key, ttl_data):
 
     for namespace in ttl_data:
         if namespace['compiled_regex'].match(key):
+            print(f"{key} matches {namespace['compiled_regex']}")
             max_ttl = max(ttl, namespace['ttl_ms'])
+            time.sleep(2)
 
     return max_ttl
 
@@ -85,7 +86,6 @@ def main():
     keys_file = open(compressed_keys_log, 'r+')
     compressed_keys=set([key.strip() for key in keys_file.readlines()])
     ttl_data = generate_ttl_data()
-    print(ttl_data)
 
     start_time = time.time()
     num_keys = 0
