@@ -15,6 +15,7 @@ from redis.cluster import ClusterNode as Node
 parser = argparse.ArgumentParser(description="Audit memory usage of Redis Cluster")
 parser.add_argument('host', type=str)
 parser.add_argument('password', type=str)
+parser.add_argument('--verbose', '-v', action='store_true')
 args = parser.parse_args()
 
 compressed_keys_log = 'compressed_keys_file.log'
@@ -48,9 +49,7 @@ def get_ttl(key, ttl_data):
 
     for namespace in ttl_data:
         if namespace['compiled_regex'].match(key):
-            print(f"{key} matches {namespace['compiled_regex']}")
             max_ttl = max(max_ttl, namespace['ttl_ms'])
-            time.sleep(2)
 
     return max_ttl
 
@@ -72,6 +71,8 @@ def compress_redis_data(client, key, ttl_data):
     
     compressed_string = gzip.compress(data)
 
+    if random.randint(1,10000) == 1234:
+        print(f"SET {key} {compressed_string} px {ttl}")
     client.set(key, compressed_string, px=ttl)
     # print('original data: ', convert_size(sys.getsizeof(data)))
     # print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
