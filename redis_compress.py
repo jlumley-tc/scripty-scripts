@@ -40,6 +40,7 @@ def generate_ttl_data():
         ttl_data = json.loads(json_file.read())
 
     for d in ttl_data:
+        print(re.compile(d['regex']))
         d['compiled_regex'] = re.compile(d['regex'])
 
     return ttl_data
