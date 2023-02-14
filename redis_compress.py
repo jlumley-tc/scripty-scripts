@@ -55,7 +55,7 @@ def get_ttl(key, ttl_data):
 
     if max_ttl == 0:
         max_ttl = 1000 * 60 * 60 * 24 * 365
-        error_log.write("Could not match {key} to ttl setting ttl to one year")
+        error_log.write(f"Could not match {key} to ttl setting ttl to one year\n")
 
     return max_ttl
 
