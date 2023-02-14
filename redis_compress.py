@@ -4,6 +4,7 @@ import argparse
 import gzip
 import json
 import math
+import os
 import random
 import re
 import sys
@@ -19,7 +20,11 @@ parser.add_argument('password', type=str)
 parser.add_argument('--verbose', '-v', action='store_true')
 args = parser.parse_args()
 
-compressed_keys_log = open('compressed_keys_file.log', 'r+')
+if not os.path.exists('compressed_keys_file.log'):
+    compressed_keys_log = open('compressed_keys_file.log', 'w+')
+else:
+    compressed_keys_log = open('compressed_keys_file.log', 'r+')
+
 error_log = open('errors.log', 'a')
 de_dupe_regex = re.compile("de-dupe")
 
