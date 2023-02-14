@@ -19,7 +19,8 @@ parser.add_argument('password', type=str)
 parser.add_argument('--verbose', '-v', action='store_true')
 args = parser.parse_args()
 
-compressed_keys_log = 'compressed_keys_file.log'
+compressed_keys_log = open('compressed_keys_file.log', 'r+')
+error_log = open('errors.log', 'a')
 de_dupe_regex = re.compile("de-dupe")
 
 
@@ -51,6 +52,10 @@ def get_ttl(key, ttl_data):
     for namespace in ttl_data:
         if namespace['compiled_regex'].match(key):
             max_ttl = max(max_ttl, namespace['ttl_ms'])
+
+    if max_ttl == 0:
+        max_ttl = 1000 * 60 * 60 * 24 * 365
+        error_log.write("Could not match {key} to ttl setting ttl to one year")
 
     return max_ttl
 
@@ -85,8 +90,7 @@ def main():
     startup_nodes = [Node(args.host, 6379)]
     client = Redis(startup_nodes=startup_nodes, password=args.password)
     
-    keys_file = open(compressed_keys_log, 'r+')
-    compressed_keys=set([key.strip() for key in keys_file.readlines()])
+    compressed_keys=set([key.strip() for key in compressed_keys_log.readlines()])
     ttl_data = generate_ttl_data()
 
     start_time = time.time()
@@ -109,7 +113,7 @@ def main():
             continue
         
         compress_redis_data(client, key, ttl_data)
-        keys_file.write(key+"\n")
+        compressed_keys_log.write(key+"\n")
 
 
 if __name__ == "__main__":
