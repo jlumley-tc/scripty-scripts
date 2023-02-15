@@ -75,6 +75,9 @@ def verify_compressed(client, key):
 def compress_redis_data(client, key, ttl_data):
 
     data = client.get(key)
+    if not is_compressed(data):
+        client.set(key, compressed_string, px=ttl)
+
     ttl = get_ttl(key, ttl_data)
 
     compressed_string = gzip.compress(data)
@@ -85,10 +88,6 @@ def compress_redis_data(client, key, ttl_data):
             print('original data: ', convert_size(sys.getsizeof(data)))
             print('compressed data: ', convert_size(sys.getsizeof(compressed_string)))
             print('compression ratio: ', round(sys.getsizeof(compressed_string)/sys.getsizeof(data),2))
-
-    if not is_compressed(data):
-        client.set(key, compressed_string, px=ttl)
-
 
 def main():
 
