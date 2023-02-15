@@ -75,12 +75,12 @@ def verify_compressed(client, key):
 def compress_redis_data(client, key, ttl_data):
 
     data = client.get(key)
-    if not is_compressed(data):
-        client.set(key, compressed_string, px=ttl)
+    if is_compressed(data):
+        return
 
     ttl = get_ttl(key, ttl_data)
-
     compressed_string = gzip.compress(data)
+    client.set(key, compressed_string, px=ttl)
 
     if args.verbose:
         if random.randint(1,10000) == 1234:
