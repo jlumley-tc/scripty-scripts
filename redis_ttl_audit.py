@@ -98,10 +98,11 @@ def main():
             pass
 
     for node in masters:
+        node_client = client.get_node_client(node)
         cursor = 0
         while True:
-            cursor, keys = client.scan(
-                cursor=cursor, match=args.match, count=args.count, target_nodes=node
+            cursor, keys = node_client.scan(
+                cursor=cursor, match=args.match, count=args.count
             )
 
             for k in keys:
