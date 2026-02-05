@@ -100,7 +100,7 @@ def print_summary(data, ns_key_counts, db_size, ns_avg_size, ns_max_size):
         max_size = ns_max_size.get(namespace, 0)
 
         print(
-            f"{namespace:<30} | {sizeof_fmt(namespace_size):<12} | {pct:<7}% | {est_keys:<12} | {sizeof_fmt(avg_size):<12} | {sizeof_fmt(max_size):<12}"
+            f"{namespace:<80} | {sizeof_fmt(namespace_size):<12} | {pct:<7}% | {est_keys:<12} | {sizeof_fmt(avg_size):<12} | {sizeof_fmt(max_size):<12}"
         )
 
     print()
