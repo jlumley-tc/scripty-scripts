@@ -68,6 +68,10 @@ def audit_redis(client, keys):
     return dict(totals), dict(ns_key_counts), dict(ns_avg_size), dict(ns_max_size)
 
 
+def int_with_commas(n: int) -> str:
+    return f"{n:,}"
+
+
 def print_summary(data, ns_key_counts, db_size, ns_avg_size, ns_max_size):
     if data.get("total", 0) == 0:
         print("No memory usage data collected (total=0).")
@@ -78,7 +82,7 @@ def print_summary(data, ns_key_counts, db_size, ns_avg_size, ns_max_size):
     od = OrderedDict(sorted(data.items(), key=lambda kv: kv[1], reverse=True))
 
     print(
-        f"{'Namespace':<30} | {'Size':<12} | {'%':<7} | {'Est. # Keys':<12} | {'Avg Size':<12} | {'Max Size':<12}"
+        f"{'Namespace':<80} | {'Size':<12} | {'%':<7} | {'Est. # Keys':<12} | {'Avg Size':<12} | {'Max Size':<12}"
     )
     print("-" * 110)
     for namespace, raw_bytes in od.items():
@@ -91,7 +95,7 @@ def print_summary(data, ns_key_counts, db_size, ns_avg_size, ns_max_size):
 
         # Estimated number of keys in this namespace (scale sampled count)
         sampled_keys = ns_key_counts.get(namespace, 0)
-        est_keys = int(round(sampled_keys * (1 / sample)))
+        est_keys = int_with_commas(int(round(sampled_keys * (1 / sample))))
 
         # Averages should NOT be scaled; ns_avg_size is already per-key
         avg_size = ns_avg_size.get(namespace, 0)
