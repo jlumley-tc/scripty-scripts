@@ -1,44 +1,78 @@
 # ES Performance Report
 
-- Generated: 2026-04-01T17:01:33Z
+- Generated: 2026-04-02T14:23:22Z
 - Base URL: https://elastic-monos-tx-client.lb.prod-coretech-baas.cnco.tucows.systems
 - Index: datastream-search-account-history-financial-transaction-0
-- Date range: 2025-10-03T17:00:32Z .. 2026-04-01T17:00:32Z
-- Range: 6m
-- Root size: 100
+- Date range: 2025-04-07T14:22:40Z .. 2026-04-02T14:22:40Z
+- Range: 12m
+- Root size: 50
 - Sub multiplier: 2.0
-- Sub size: 200
+- Sub size: 100
 - Iterations: 10
+- Target IPS: 80.0
+- Achieved IPS: 23.56
+- Max concurrency: 1000
 - Request cache: false
-- Routing: enabled
+- Routing: disabled
 
 ## Results Summary
 
+
 | Metric | Value |
 | --- | --- |
-| Runs | 250 |
-| Root avg wall (ms) | 98.74 |
-| Root min/max wall (ms) | 57.58 / 1433.26 |
-| Sub avg wall (ms) | 138.77 |
-| Sub min/max wall (ms) | 59.51 / 997.41 |
-| Total avg wall (ms) | 243.38 |
-| Total min/max (ms) | 123.96 / 2101.67 |
-| Root avg ES took (ms) | 42.25 |
-| Sub avg ES took (ms) | 41.72 |
-| Root hits (unique) | 1098, 1189, 1347, 1449, 1459, 1547, 1631, 1691, 1692, 1828, 1847, 1958, 1962, 2029, 2036, 2070, 2099, 2198, 2212, 2308, 2379, 2396, 2428, 2774 |
-| Root brand IDs (unique) | 79, 81, 87, 89, 92, 95, 96, 98, 99, 100 |
-| Sub hits (unique) | 179, 261, 280, 293, 299, 313, 342, 364, 380, 384, 386, 394, 412, 431, 451, 453, 456, 466, 485, 488, 493, 501, 612, 664, 798 |
+| Runs | 990 |
+| Root avg wall (ms) | 249.50 |
+| Root min/max wall (ms) | 213.25 / 773.23 |
+| Root p50 wall (ms) | 225.70 |
+| Root p90 wall (ms) | 300.61 |
+| Root p99 wall (ms) | 505.02 |
+| Root avg TTFB (ms) | 198.90 |
+| Root p50 TTFB (ms) | 179.29 |
+| Root p90 TTFB (ms) | 245.31 |
+| Root p99 TTFB (ms) | 471.97 |
+| Root avg read (ms) | 50.60 |
+| Root p50 read (ms) | 52.49 |
+| Root p90 read (ms) | 64.26 |
+| Root p99 read (ms) | 70.51 |
+| Root avg decode (ms) | 0.30 |
+| Root p50 decode (ms) | 0.27 |
+| Root p90 decode (ms) | 0.35 |
+| Root p99 decode (ms) | 1.17 |
+| Sub avg wall (ms) | 308.41 |
+| Sub min/max wall (ms) | 168.21 / 629.71 |
+| Sub p50 wall (ms) | 286.81 |
+| Sub p90 wall (ms) | 359.77 |
+| Sub p99 wall (ms) | 561.14 |
+| Sub avg TTFB (ms) | 198.40 |
+| Sub p50 TTFB (ms) | 177.21 |
+| Sub p90 TTFB (ms) | 250.34 |
+| Sub p99 TTFB (ms) | 470.53 |
+| Sub avg read (ms) | 110.01 |
+| Sub p50 read (ms) | 116.59 |
+| Sub p90 read (ms) | 130.32 |
+| Sub p99 read (ms) | 138.07 |
+| Sub avg decode (ms) | 0.73 |
+| Sub p50 decode (ms) | 0.61 |
+| Sub p90 decode (ms) | 1.26 |
+| Sub p99 decode (ms) | 2.14 |
+| Total avg wall (ms) | 558.99 |
+| Total min/max (ms) | 464.72 / 1235.66 |
+| Total p50 wall (ms) | 520.82 |
+| Total p90 wall (ms) | 732.64 |
+| Total p99 wall (ms) | 946.75 |
+| Root avg ES took (ms) | 18.84 |
+| Sub avg ES took (ms) | 15.03 |
 
 ## Sample Queries
 
 Account UUID and transaction IDs are redacted.
-Routing: routing=<REDACTED_ACCOUNT>
+Routing: disabled
 
 ### Root Query
 
 ```json
 {
-  "size": 100,
+  "size": 50,
   "_source": true,
   "query": {
     "bool": {
@@ -59,8 +93,8 @@ Routing: routing=<REDACTED_ACCOUNT>
         {
           "range": {
             "transaction_date": {
-              "gte": "2025-10-03T17:00:32Z",
-              "lte": "2026-04-01T17:00:32Z"
+              "gte": "2025-04-07T14:22:40Z",
+              "lte": "2026-04-02T14:22:40Z"
             }
           }
         }
@@ -93,7 +127,7 @@ Routing: routing=<REDACTED_ACCOUNT>
 
 ```json
 {
-  "size": 200,
+  "size": 100,
   "_source": true,
   "query": {
     "bool": {
@@ -112,18 +146,10 @@ Routing: routing=<REDACTED_ACCOUNT>
           }
         },
         {
-          "terms": {
-            "transaction_type": [
-              "network_tax",
-              "non_network_tax"
-            ]
-          }
-        },
-        {
           "range": {
             "transaction_date": {
-              "gte": "2025-10-03T17:00:32Z",
-              "lte": "2026-04-01T17:00:32Z"
+              "gte": "2025-04-07T14:22:40Z",
+              "lte": "2026-04-02T14:22:40Z"
             }
           }
         },

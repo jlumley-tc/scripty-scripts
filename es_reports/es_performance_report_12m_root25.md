@@ -1,44 +1,80 @@
 # ES Performance Report
 
-- Generated: 2026-04-01T17:02:18Z
+- Generated: 2026-04-02T14:22:40Z
 - Base URL: https://elastic-monos-tx-client.lb.prod-coretech-baas.cnco.tucows.systems
 - Index: datastream-search-account-history-financial-transaction-0
-- Date range: 2025-04-06T17:01:33Z .. 2026-04-01T17:01:33Z
+- Date range: 2025-04-07T14:21:58Z .. 2026-04-02T14:21:58Z
 - Range: 12m
-- Root size: 100
+- Root size: 25
 - Sub multiplier: 2.0
-- Sub size: 200
+- Sub size: 50
 - Iterations: 10
+- Target IPS: 80.0
+- Achieved IPS: 23.79
+- Max concurrency: 1000
 - Request cache: false
-- Routing: enabled
+- Routing: disabled
 
 ## Results Summary
 
+Error: Request error for account c1a62d4b-6aaa-47d6-a878-a1bf2176caae:
+
 | Metric | Value |
 | --- | --- |
-| Runs | 250 |
-| Root avg wall (ms) | 75.21 |
-| Root min/max wall (ms) | 57.33 / 307.30 |
-| Sub avg wall (ms) | 97.91 |
-| Sub min/max wall (ms) | 58.74 / 451.28 |
-| Total avg wall (ms) | 179.01 |
-| Total min/max (ms) | 122.84 / 735.08 |
-| Root avg ES took (ms) | 21.00 |
-| Sub avg ES took (ms) | 20.00 |
-| Root hits (unique) | 1123, 1214, 1227, 1366, 1520, 1530, 1606, 1653, 1742, 1762, 1870, 1888, 1985, 2046, 2070, 2113, 2122, 2229, 2273, 2355, 2394, 2432, 2457, 2812 |
-| Root brand IDs (unique) | 79, 81, 87, 89, 92, 95, 96, 98, 99, 100 |
-| Sub hits (unique) | 179, 261, 280, 293, 299, 313, 342, 364, 380, 384, 386, 394, 412, 431, 451, 453, 456, 466, 485, 488, 493, 501, 612, 664, 798 |
+| Runs | 992 |
+| Root avg wall (ms) | 579.77 |
+| Root min/max wall (ms) | 173.65 / 2750.08 |
+| Root p50 wall (ms) | 457.83 |
+| Root p90 wall (ms) | 1166.46 |
+| Root p99 wall (ms) | 1790.89 |
+| Root avg TTFB (ms) | 562.00 |
+| Root p50 TTFB (ms) | 443.84 |
+| Root p90 TTFB (ms) | 1156.52 |
+| Root p99 TTFB (ms) | 1777.88 |
+| Root avg read (ms) | 17.77 |
+| Root p50 read (ms) | 15.96 |
+| Root p90 read (ms) | 40.09 |
+| Root p99 read (ms) | 82.54 |
+| Root avg decode (ms) | 0.17 |
+| Root p50 decode (ms) | 0.14 |
+| Root p90 decode (ms) | 0.18 |
+| Root p99 decode (ms) | 1.50 |
+| Sub avg wall (ms) | 505.40 |
+| Sub min/max wall (ms) | 175.31 / 1843.31 |
+| Sub p50 wall (ms) | 291.41 |
+| Sub p90 wall (ms) | 990.60 |
+| Sub p99 wall (ms) | 1286.69 |
+| Sub avg TTFB (ms) | 447.40 |
+| Sub p50 TTFB (ms) | 247.47 |
+| Sub p90 TTFB (ms) | 902.53 |
+| Sub p99 TTFB (ms) | 1226.12 |
+| Sub avg read (ms) | 58.00 |
+| Sub p50 read (ms) | 51.84 |
+| Sub p90 read (ms) | 94.98 |
+| Sub p99 read (ms) | 164.76 |
+| Sub avg decode (ms) | 0.38 |
+| Sub p50 decode (ms) | 0.30 |
+| Sub p90 decode (ms) | 0.41 |
+| Sub p99 decode (ms) | 2.38 |
+| Total avg wall (ms) | 1085.75 |
+| Total min/max (ms) | 362.59 / 3618.47 |
+| Total p50 wall (ms) | 744.17 |
+| Total p90 wall (ms) | 2135.94 |
+| Total p99 wall (ms) | 2814.21 |
+| Root avg ES took (ms) | 179.26 |
+| Sub avg ES took (ms) | 52.84 |
+
 
 ## Sample Queries
 
 Account UUID and transaction IDs are redacted.
-Routing: routing=<REDACTED_ACCOUNT>
+Routing: disabled
 
 ### Root Query
 
 ```json
 {
-  "size": 100,
+  "size": 25,
   "_source": true,
   "query": {
     "bool": {
@@ -59,8 +95,8 @@ Routing: routing=<REDACTED_ACCOUNT>
         {
           "range": {
             "transaction_date": {
-              "gte": "2025-04-06T17:01:33Z",
-              "lte": "2026-04-01T17:01:33Z"
+              "gte": "2025-04-07T14:21:58Z",
+              "lte": "2026-04-02T14:21:58Z"
             }
           }
         }
@@ -93,7 +129,7 @@ Routing: routing=<REDACTED_ACCOUNT>
 
 ```json
 {
-  "size": 200,
+  "size": 50,
   "_source": true,
   "query": {
     "bool": {
@@ -112,18 +148,10 @@ Routing: routing=<REDACTED_ACCOUNT>
           }
         },
         {
-          "terms": {
-            "transaction_type": [
-              "network_tax",
-              "non_network_tax"
-            ]
-          }
-        },
-        {
           "range": {
             "transaction_date": {
-              "gte": "2025-04-06T17:01:33Z",
-              "lte": "2026-04-01T17:01:33Z"
+              "gte": "2025-04-07T14:21:58Z",
+              "lte": "2026-04-02T14:21:58Z"
             }
           }
         },
