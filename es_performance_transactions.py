@@ -222,6 +222,18 @@ def parse_args() -> argparse.Namespace:
         help="Maximum in-flight iterations",
     )
     parser.add_argument(
+        "--max-connections",
+        type=int,
+        default=1000,
+        help="Maximum total HTTP connections for the httpx client",
+    )
+    parser.add_argument(
+        "--max-keepalive-connections",
+        type=int,
+        default=1000,
+        help="Maximum keepalive HTTP connections for the httpx client",
+    )
+    parser.add_argument(
         "--api-key-env",
         default="ES_API_KEY",
         help="Env var name that holds the Elasticsearch API key",
@@ -631,18 +643,20 @@ async def main() -> int:
             print(message)
 
     log("Benchmark configuration")
-    log(f"  URL:             {url}")
-    log(f"  Accounts:        {len(accounts)}")
-    log(f"  Date range:      {start_date} .. {end_date}")
-    log(f"  Range:           {range_value}")
-    log(f"  Root size:       {args.root_size}")
-    log(f"  Sub multiplier: {args.sub_multiplier}")
-    log(f"  Sub size:       {sub_size}")
-    log(f"  Iterations:      {args.iterations}")
+    log(f"  URL:                     {url}")
+    log(f"  Accounts:                {len(accounts)}")
+    log(f"  Date range:              {start_date} .. {end_date}")
+    log(f"  Range:                   {range_value}")
+    log(f"  Root size:               {args.root_size}")
+    log(f"  Sub multiplier:          {args.sub_multiplier}")
+    log(f"  Sub size:                {sub_size}")
+    log(f"  Iterations:              {args.iterations}")
     target_ips = args.target_ips if args.target_ips > 0 else 0.0
-    log(f"  Target IPS:      {target_ips}")
-    log(f"  Max concurrency: {args.max_concurrency}")
-    log(f"  Routing:         {'enabled' if args.routing else 'disabled'}")
+    log(f"  Target IPS:              {target_ips}")
+    log(f"  Max concurrency:         {args.max_concurrency}")
+    log(f"  Max connections:         {args.max_connections}")
+    log(f"  Max keepalive conns:     {args.max_keepalive_connections}")
+    log(f"  Routing:                 {'enabled' if args.routing else 'disabled'}")
 
     api_key = os.environ.get(args.api_key_env)
     if not api_key:
@@ -669,6 +683,11 @@ async def main() -> int:
             f" | token_length={len(token)}"
             f" | env={args.api_key_env}"
         )
+
+    limits = httpx.Limits(
+        max_connections=args.max_connections,
+        max_keepalive_connections=args.max_keepalive_connections,
+    )
 
     all_results: list[IterationResult] = []
     error_message: str | None = None
@@ -772,6 +791,7 @@ async def main() -> int:
         headers=headers,
         timeout=args.timeout,
         verify=False,
+        limits=limits,
     ) as client:
         next_fire = time.perf_counter()
         for _ in range(total_iterations):
