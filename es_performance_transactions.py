@@ -212,7 +212,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--target-ips",
         type=float,
-        default=80.0,
+        default=120.0,
         help="Target iterations per second across all accounts",
     )
     parser.add_argument(
